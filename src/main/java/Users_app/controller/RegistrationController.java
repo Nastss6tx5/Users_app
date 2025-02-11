@@ -28,13 +28,13 @@ public class RegistrationController {
     }
 
     @PostMapping("/register/save")
-    public String registration(@Valid @ModelAttribute("user") User user, BindingResult result, Model model) {
+    public String registration(@Valid @ModelAttribute("user") User user, BindingResult result) {
         if (result.hasErrors()) {
             return "register";
         }
         User existingUser = userService.findUserByUsername(user.getUsername());
         if (existingUser != null) {
-            result.rejectValue("username", null, "Username is already in use");
+            result.rejectValue("username", "Username is already in use");
             return "register";
         }
         String encodedPassword = passwordEncoder.encode(user.getPassword());

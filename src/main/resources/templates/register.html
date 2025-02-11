@@ -113,6 +113,11 @@
             <input type="number" id="age" th:field="*{age}" required="required"/>
             <p th:if="${#fields.hasErrors('age')}" class="error-message" th:errors="*{age}"></p>
         </div>
+        <div>
+            <label for="city">City:</label>
+            <input type="text" id="city" th:field="*{city}" required="required"/>
+            <p th:if="${#fields.hasErrors('city')}" class="error-message" th:errors="*{city}"></p>
+        </div>
         <button type="submit">Register</button>
     </form>
     <a th:href="@{/login}">Login</a>

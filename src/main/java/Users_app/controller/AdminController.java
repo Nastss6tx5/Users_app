@@ -3,20 +3,25 @@ package Users_app.controller;
 import Users_app.model.Role;
 import Users_app.model.User;
 import Users_app.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -51,20 +56,20 @@ public class AdminController {
     }
 
     @PostMapping("/edit/{id}")
-    public String updateUser(@PathVariable Long id, User userForm) {
-        User existingUser = userService.getUserById(id);
-        if (existingUser == null) {
-            return "redirect:/admin/users?error=userNotFound";
+    public String updateUser(@PathVariable Long id,
+                             @Valid @ModelAttribute("user") User userForm,
+                             BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("user", userForm);
+            return "admin/edit";
         }
 
-        existingUser.setFirstName(userForm.getFirstName());
-        existingUser.setLastName(userForm.getLastName());
-        existingUser.setEmail(userForm.getEmail());
-        existingUser.setAge(userForm.getAge());
-        existingUser.setCity(userForm.getCity());
-
-        userService.saveUser(existingUser);
-        return "redirect:/admin/users";
+        try {
+            userService.updateUser(id, userForm);
+            return "redirect:/admin/users?success=userUpdated";
+        } catch (IllegalArgumentException e) {
+            return "redirect:/admin/users?error=userNotFound";
+        }
     }
 
     @GetMapping("/delete/{id}")
@@ -88,17 +93,14 @@ public class AdminController {
                                   Model model) {
         User user = userService.getUserById(id);
 
-        if (roleIds == null || roleIds.isEmpty()) {
+        if (CollectionUtils.isEmpty(roleIds)) {
             model.addAttribute("errorMessage", "User has no roles");
             model.addAttribute("user", user);
             model.addAttribute("allRoles", userService.getAllRoles());
             return "admin/editRoles";
         }
 
-        Set<Role> roles = roleIds.stream()
-                .map(userService::getRoleById)
-                .collect(Collectors.toSet());
-
+        Set<Role> roles = new HashSet<>(userService.getRolesByIds(roleIds));
         user.setRoles(roles);
         userService.saveUser(user);
         return "redirect:/admin/users";

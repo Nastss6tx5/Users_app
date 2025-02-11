@@ -2,6 +2,9 @@ package Users_app.service;
 
 import Users_app.model.Role;
 import Users_app.model.User;
+
+
+import java.util.Collection;
 import java.util.List;
 
 public interface UserService {
@@ -18,7 +21,13 @@ public interface UserService {
 
     Role findRoleByName(String name);
 
-    List<Role> getAllRoles(); // Новый метод
+    List<Role> getAllRoles();
 
-    Role getRoleById(Long id); // Новый метод
+    Role getRoleById(Long id);
+
+    void updateUser(Long id, User userForm);
+
+    User loadUserByUsername(String username);
+
+    List<Role> getRolesByIds(Collection<Long> roleIds);
 }

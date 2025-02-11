@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +48,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Override
@@ -73,5 +75,32 @@ public class UserServiceImpl implements UserService {
     @Override
     public Role getRoleById(Long id) {
         return roleRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public void updateUser(Long id, User userForm) {
+        User existingUser = getUserById(id);
+        if (existingUser == null) {
+            throw new IllegalArgumentException("User not found with id: " + id);
+        }
+
+        existingUser.setFirstName(userForm.getFirstName());
+        existingUser.setLastName(userForm.getLastName());
+        existingUser.setEmail(userForm.getEmail());
+        existingUser.setAge(userForm.getAge());
+        existingUser.setCity(userForm.getCity());
+
+        userRepository.save(existingUser);
+    }
+
+    @Override
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    }
+
+    @Override
+    public List<Role> getRolesByIds(Collection<Long> roleIds) {
+        return roleRepository.findAllByIdIn(roleIds);
     }
 }

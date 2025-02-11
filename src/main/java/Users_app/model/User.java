@@ -42,11 +42,9 @@ public class User implements UserDetails {
     @Column(name = "last_name")
     private String lastName;
 
-    @NotEmpty
     @Column(name = "username", unique = true)
     private String username;
 
-    @NotEmpty
     @Size(min = 6)
     @Column(name = "password")
     private String password;
