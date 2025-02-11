@@ -51,9 +51,19 @@ public class AdminController {
     }
 
     @PostMapping("/edit/{id}")
-    public String updateUser(@PathVariable Long id, User user) {
-        user.setId(id);
-        userService.saveUser(user);
+    public String updateUser(@PathVariable Long id, User userForm) {
+        User existingUser = userService.getUserById(id);
+        if (existingUser == null) {
+            return "redirect:/admin/users?error=userNotFound";
+        }
+
+        existingUser.setFirstName(userForm.getFirstName());
+        existingUser.setLastName(userForm.getLastName());
+        existingUser.setEmail(userForm.getEmail());
+        existingUser.setAge(userForm.getAge());
+        existingUser.setCity(userForm.getCity());
+
+        userService.saveUser(existingUser);
         return "redirect:/admin/users";
     }
 
